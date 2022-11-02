@@ -11,16 +11,25 @@ using namespace std;
 class Client_Socket
 {
 	public:
-		Client_Socket(int RequestVersion);		//one argument constructor
-		~Client_Socket();							//destructor
-		void ConnectServer(const char* server_ip, const int server_port);			// function to connect to the server
+		Client_Socket(int RequestVersion);		
+		~Client_Socket();
+		// Connect to the server running on address(server_ip, server_port)
+		void ConnectServer(const char* server_ip, const int server_port);			
+		// spawn threads for receiving/sending messages from/to the chat room
 		void initiate_chat_room();
 	private:
-		WSADATA wsaData;			//struct defined in WinSock2.h
-		SOCKET ClientSocket;				//struct defined in WinSock2.h
-		sockaddr_in ClientSocketAddress;		//windows extended data type "
-		void SetClientSockAddr(const char* server_ip, const int server_port);			// to fill the sockAddr structure
+		// struct defined in winsock2.h, Information about Windows Sockets
+		WSADATA wsaData;
+		// Socket Id defined for Client
+		SOCKET ClientSocket;				
+		// Socket Address of Server, on which client will connect
+		sockaddr_in ClientSocketAddress;	
+		
+		// Fill the sockAddr structure
+		void SetClientSockAddr(const char* server_ip, const int server_port);			
+		// Send message to chat room
 		void message_send();
+		// Receive message from chat room
 		void message_read();
 };
 #endif

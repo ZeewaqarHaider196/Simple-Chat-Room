@@ -23,35 +23,40 @@ Server_Socket::Server_Socket(int RequestVersion)
 		throw std::runtime_error("Startup failed! WSAStartup failed. Error Code: " + std::to_string(ret));
 }
 
-Server_Socket::~Server_Socket()				//destructor
+Server_Socket::~Server_Socket()
 {
 	WSACleanup();
-	if(ServerSocket != INVALID_SOCKET)
-		closesocket(ServerSocket);
-
-    for (auto i : connections)	 // Closing all client Sockets, if any remains
+	
+	// Closing all client Sockets, if any remains
+	for (auto i : connections)
 	{
-		if(i.first != INVALID_SOCKET)
+		if (i.first != INVALID_SOCKET)
 			closesocket(i.first);	
 	}
+	
+	if (ServerSocket != INVALID_SOCKET)
+		closesocket(ServerSocket);
 }
 
 void Server_Socket::SetServerSockAddr(sockaddr_in *ServerSocketAddress, int PortNumber)
 {
 	ServerSocketAddress->sin_family = AF_INET;
 	ServerSocketAddress->sin_port = htons(PortNumber);
-	ServerSocketAddress->sin_addr.S_un.S_addr = INADDR_ANY;			// Listen on host IP's
+	ServerSocketAddress->sin_addr.S_un.S_addr = INADDR_ANY;			// Listen on host IP
 }
 
 void Server_Socket::start_server(int PortNumber)
 {	
-	if((ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)			// Create server socket
+	// Create server socket
+	if((ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
 		throw std::runtime_error("Could not create socket.");
-	SetServerSockAddr(&ServerSocketAddress, PortNumber);	// Fill ServerSocketAddress
+	SetServerSockAddr(&ServerSocketAddress, PortNumber);	
 	
-    if(bind(ServerSocket, (sockaddr*)(&ServerSocketAddress), sizeof(ServerSocketAddress)) != SUCCESS)
+    // Bind the created socket with Socket Address
+	if(bind(ServerSocket, (sockaddr*)(&ServerSocketAddress), sizeof(ServerSocketAddress)) != SUCCESS)
 		throw std::runtime_error("Could not bind socket.");
 	
+	// Put the Server Socket on listening. It will accept SOMAXCON
     if(listen(ServerSocket, SOMAXCONN) != SUCCESS)			//SOMAXCONN is maximum no. of connections
 		throw std::runtime_error("Could not put the socket in listening mode.");
 	
@@ -62,8 +67,8 @@ void Server_Socket::start_server(int PortNumber)
 void Server_Socket::initiate_chat_room()
 {
 	std::thread init_thread([&]()	
-		{	// Create lambda funtion to handle the new connection request 
-			while (true) 	// This while loop will receive connection for the chat room.
+		{	// lambda funtion to handle the new connection request 
+			while (true)
 			{
 				SOCKET ClientSocket;
 				sockaddr_in ClientAddr;
@@ -74,7 +79,8 @@ void Server_Socket::initiate_chat_room()
 			}	
 		}
 	);
-	init_thread.detach();	// detaching the thread to run independently.
+	// detaching the thread to run independently.
+	init_thread.detach();
 	cout << "Chat room has been created." << endl; 
 } 
 
@@ -90,13 +96,13 @@ void Server_Socket::read_message(Connection c)
     bool disconnect = true;
 	SOCKET ClientSocket = c.ClientSocket;
 	std::string broadcast_msg = "";
-    char buff[1024];
+    char message_buffer[ONE_KB];
 	// Getting Name of Client, that will be send by client Application.
-	int BytesRec = recv(ClientSocket, buff, sizeof(buff), 0);
-	if(BytesRec > 0)		
+	int message_size = recv(ClientSocket, message_buffer, sizeof(message_buffer), 0);
+	if(message_size > 0)		
 	{
-		buff[BytesRec] = 0; 
-		c.client_name = std::string(buff);
+		message_buffer[message_size] = 0; 
+		c.client_name = std::string(message_buffer);
 		disconnect = false;		
 	}		
 	else
@@ -106,23 +112,23 @@ void Server_Socket::read_message(Connection c)
 	// Starting communication loop	
 	while (!disconnect)
     {
-		BytesRec = recv(ClientSocket, buff, sizeof(buff), 0);
-        if(BytesRec == 0)		
+		message_size = recv(ClientSocket, message_buffer, sizeof(message_buffer), 0);
+        if(message_size == 0)		
         {
             disconnect = true;		
             cout << "SERVER MSG: " << c.client_name << ": closed the connection." << endl;		
         }		
-        else if(BytesRec == SOCKET_ERROR)		
+        else if(message_size == SOCKET_ERROR)		
         {				
             disconnect = true;
             cout << "SERVER MSG: " << c.client_name << ": seems to be offline." << endl;		
         }		
         else		
         {		
-            buff[BytesRec] = 0;
-            cout << c.client_name << ": " << buff << endl;			
-			// sending messages to other people in the chat room
-			broadcast_msg = c.client_name + ": " + std::string(buff);
+            message_buffer[message_size] = 0;
+            cout << c.client_name << ": " << message_buffer << endl;			
+			// sending message to other people in the chat room
+			broadcast_msg = c.client_name + ": " + std::string(message_buffer);
 			for (auto i : connections)
 			{
 				if (i.first != ClientSocket)

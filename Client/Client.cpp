@@ -1,5 +1,5 @@
 #include "Client.h"
-Client_Socket::Client_Socket(int RequestVersion)		// Constructor call
+Client_Socket::Client_Socket(int RequestVersion)
 {
 	ClientSocket = INVALID_SOCKET;
 	int ret = WSAStartup(MAKEWORD(RequestVersion, 0), &wsaData);
@@ -16,8 +16,9 @@ Client_Socket::Client_Socket(int RequestVersion)		// Constructor call
 Client_Socket::~Client_Socket()		
 {
 	WSACleanup();
-
-	if(ClientSocket != INVALID_SOCKET)	// closing Client Socket 
+	
+	// closing Client Socket
+	if(ClientSocket != INVALID_SOCKET)	 
 		closesocket(ClientSocket);
 }
 void Client_Socket::SetClientSockAddr(const char* server_ip, const int server_port)
@@ -30,12 +31,13 @@ void Client_Socket::ConnectServer(const char* server_ip, const int server_port)
 {
 	SetClientSockAddr(server_ip, server_port);		
 	
+	// Create client socket
 	if ((ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
 		throw std::runtime_error("Could not create socket.");
 	
 	cout << "Attempting to connect to Server..." << endl;
 	
-	if (connect(ClientSocket, (sockaddr*)(&ClientSocketAddress), sizeof(ClientSocketAddress)) != SUCCESS)		// Connect to the server
+	if (connect(ClientSocket, (sockaddr*)(&ClientSocketAddress), sizeof(ClientSocketAddress)) != SUCCESS)		
 		throw std::runtime_error("Could not connect");
 
 	this->initiate_chat_room();
@@ -46,7 +48,7 @@ void Client_Socket::initiate_chat_room()
 	cout << "you are added to chat room" << endl << endl;	
 	cout << "please enter your name: ";
 	
-	char *name = new char[NAME_LEN];	
+	char name[NAME_LEN];	
 	cin.getline(name, NAME_LEN, '\n');
 	
 	// sending your name to server.
@@ -65,7 +67,7 @@ void Client_Socket::initiate_chat_room()
 
 void Client_Socket::message_read()
 {
-	char *message_buffer = new char[ONE_KB];	// 1 KB message size at max.
+	char message_buffer[ONE_KB];	// 1 KB message size at max.
 	bool disconnect = false;
 	int message_size = 0;
 	while(!disconnect)
@@ -77,14 +79,14 @@ void Client_Socket::message_read()
 			disconnect = true;
 		}
 		message_buffer[message_size] = 0;
-		cout << "\r\r\r\r\r" << message_buffer << endl; // \r is moving one char backward
+		cout << "\r\r\r\r\r" << message_buffer << endl; // \r is for moving one char backward
 		cout << "You: ";
 	}
 }
 
 void Client_Socket::message_send()
 {
-	char *message_buffer = new char[ONE_KB];	// 1 KB message size at max.
+	char message_buffer[ONE_KB];	// 1 KB message size at max.
 	bool disconnect = false;
 	while(!disconnect)
 	{

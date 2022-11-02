@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
 	try
 	{ 
-		Client_Socket MyClient(REQ_WINSOCK_VER);	// Winsock startup.
+		Client_Socket MyClient(REQ_WINSOCK_VER);
 		MyClient.ConnectServer(IP, PORT);
 		while (true)
 		{
