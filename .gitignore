@@ -1,0 +1,4 @@
+/build/*
+/Server/build/*
+/Client/build/*
+/.vscode/*
