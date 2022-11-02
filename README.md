@@ -1,5 +1,5 @@
 # Simple-Chat-Room
-The repo contains the Simple Chat Room in C/C++ using socket programming.
+The repo contains a Multi-threaded Simple Chat Room developed in C/C++ using TCP/IP protocol of socket programming.
 There will two separate projects.
 1. Server
 2. Clients
@@ -11,3 +11,18 @@ Any message received from any client will be sent to all other clients present i
 
 ***** Client ***** 
 Client is a program which will run and connect with the server. After successfull connection established with server, client is able to sent message to the room.
+
+# IDE used 
+VS Code: Both client and server programs built and tested on VS Code.
+
+# Libraries 
+please link the following libraries before building the programs.
+"-lwsock32",
+"-lws2_32",
+"-lpthread",
+
+# Compiler 
+GCC 10.3.0
+
+# Command to Build Server Program
+g++.exe -g Server.h Server.cpp main.cpp -L<PATH_TO_LIB_FOLDER> -lwsock32 -lws2_32 -lpthread -o Server.exe
