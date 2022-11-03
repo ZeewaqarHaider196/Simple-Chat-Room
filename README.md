@@ -34,3 +34,5 @@ GCC 10.3.0
 
 # Command to Build Server Program
 g++.exe -g Server.h Server.cpp main.cpp -L<PATH_TO_LIB_FOLDER> -lwsock32 -lws2_32 -lpthread -o Server.exe
+# Command to Build Client Program
+g++.exe -g Client.h Client.cpp main.cpp -L<PATH_TO_LIB_FOLDER> -lwsock32 -lws2_32 -lpthread -o Client.exe
